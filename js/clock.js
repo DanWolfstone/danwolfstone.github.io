@@ -15,9 +15,9 @@ var clock = (function() {
     if (time.seconds < 10) {
       time.seconds = "0" + time.seconds;
     };
-    // if (time.hours > 12) {
-    //   time.hours = time.hours - 12;
-    // };
+     if (time.hours > 12) {
+      time.hours = time.hours - 12;
+     };
     var hour = document.createElement("span");
     hour.setAttribute("class", "clock-hour");
     hour.textContent = time.hours;
