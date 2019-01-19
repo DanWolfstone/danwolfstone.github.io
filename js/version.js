@@ -1,9 +1,11 @@
 var version = (function() {
 
-  var current = 1.0;
+  // version is normally bumped when the state needs changing or any new functionality is added
+  var current = "2.3.0";
 
   var get = function() {
-    return current;
+    var number = current.split(".");
+    return parseFloat(number.shift() + "." + number.join(""));
   };
 
   // exposed methods

@@ -3,14 +3,14 @@
   top: 50%;
   left: 50%;
   font-size: 1em;
-  z-index: 2000;
   width: 45em;
   max-width: calc(100% - 6em);
   min-width: 10em;
   transform: translate(-50%, -50%);
   opacity: 0;
   perspective: 1000px;
-  transition: opacity var(--animation-speed-slow);
+  transition: opacity var(--animation-speed-fast) ease-in-out;
+  z-index: var(--z-index-modal);
 }
 
 .modal-large {
@@ -33,7 +33,7 @@
 }
 
 .is-transition-end .modal-wrapper {
-  transition: all var(--animation-speed-medium);
+  transition: all var(--animation-speed-fast) ease-in-out;
 }
 
 .modal-body {

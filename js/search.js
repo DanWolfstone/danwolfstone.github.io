@@ -1,82 +1,86 @@
 var search = (function() {
 
-  var state = {
-    search: false
-  };
-
-  var get = function() {
-    return state;
-  };
-
   var bind = function() {
     var searchInput = helper.e(".search-input");
     var searchClear = helper.e(".search-clear");
     searchInput.addEventListener("input", function() {
-      _updateState(this);
-      _updateSearchClear();
-      render();
+      _toggle(this);
+      _searchClear();
+      link.clear();
+      link.render();
     }, false);
     searchClear.addEventListener("click", function() {
-      _updateState(this);
-      _updateSearchClear();
+      _toggle(this);
+      _searchClear();
       clear();
     }, false);
   };
 
-  var _updateState = function(input) {
+  var _toggle = function(input) {
     if (input.value != "") {
-      state.search = true;
+      state.change({
+        path: "header.search.searching",
+        value: true
+      })
     } else {
-      state.search = false;
+      state.change({
+        path: "header.search.searching",
+        value: false
+      })
     };
   };
 
-  var _updateSearchClear = function() {
+  var _searchClear = function() {
     var searchInput = helper.e(".search-input");
     var searchClear = helper.e(".search-clear");
-    if (state.search) {
+    if (state.get().header.search.searching) {
       searchClear.removeAttribute("disabled");
     } else {
       searchClear.setAttribute("disabled", "");
     };
   };
 
-  var render = function() {
+  var get = function() {
     var searchInput = helper.e(".search-input");
-    if (state.search) {
-      var searchResult = [];
+    if (state.get().header.search.searching) {
+      var searchedBookmarks = {
+        total: 0,
+        matching: []
+      };
+      searchedBookmarks.total = bookmarks.get().length;
       bookmarks.get().forEach(function(arrayItem, index) {
-        if (arrayItem.url.replace(/^https?\:\/\//i, "").replace(/\/$/, "").toLowerCase().includes(searchInput.value.toLowerCase()) || arrayItem.name.toLowerCase().includes(searchInput.value.toLowerCase())) {
-          var copy = JSON.parse(JSON.stringify(arrayItem));
-          copy.index = index;
-          searchResult.push(copy);
+        if (arrayItem.url.replace(/^https?\:\/\//i, "").replace(/\/$/, "").toLowerCase().includes(searchInput.value.toLowerCase().replace(/\s/g, "")) || arrayItem.name.toLowerCase().includes(searchInput.value.toLowerCase().replace(/\s/g, ""))) {
+          var bookmarkDataCopy = JSON.parse(JSON.stringify(arrayItem));
+          searchedBookmarks.matching.push(bookmarkDataCopy);
         };
       });
-      links.clear();
-      links.render(searchResult);
-    } else {
-      links.clear();
-      links.render();
+      return searchedBookmarks;
     };
+  };
+
+  var update = function() {
+    var search = helper.e(".search");
+    search.setAttribute("action", state.get().header.search.engine[state.get().header.search.engine.selected].url);
   };
 
   var clear = function() {
     var searchInput = helper.e(".search-input");
     searchInput.value = "";
     searchInput.focus();
-    links.clear();
-    links.render();
+    link.clear();
+    link.render();
   };
 
   var init = function() {
     bind();
+    update();
   };
 
   // exposed methods
   return {
     init: init,
     get: get,
-    render: render,
+    update: update,
     clear: clear
   };
 

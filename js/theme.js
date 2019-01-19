@@ -1,55 +1,75 @@
 var theme = (function() {
 
-  var state = {
-    r: 255,
-    g: 170,
-    b: 51,
-  };
-
-  var get = function() {
-    return state;
-  };
-
-  var bind = function() {
-    var themeAccent = helper.e(".theme-input");
-    themeAccent.addEventListener("change", function() {
-      _updateAcent(this);
-      render();
-      data.save();
-    });
-  };
-
-  var _updateAcent = function(input) {
-    state = helper.hexToRgb(input.value);
-  };
-
-  var _updateInput = function() {
-    var themeAccent = helper.e(".theme-input");
-    themeAccent.value = helper.rgbToHex(state);
-  };
-
-  var render = function(input) {
+  var render = function() {
     var html = helper.e("html");
-    html.style.setProperty("--accent", state.r + ", " + state.g + ", " + state.b);
+    var color = state.get().layout.theme.current;
+    html.style.setProperty("--accent", color.r + ", " + color.g + ", " + color.b);
   };
 
-  var restore = function(object) {
-    if (object) {
-      state = object;
-      _updateInput();
-      render();
+  var random = function() {
+    if (state.get().layout.theme.random.active) {
+      var randomVal = function(min, max) {
+        return Math.floor(Math.random() * (max - min) + 1) + min;
+      };
+      var color = {
+        any: function() {
+          return {
+            h: randomVal(0, 360),
+            s: randomVal(0, 100),
+            l: randomVal(0, 100)
+          };
+        },
+        light: function() {
+          return {
+            h: randomVal(0, 360),
+            s: randomVal(50, 90),
+            l: randomVal(50, 90)
+          };
+        },
+        dark: function() {
+          return {
+            h: randomVal(0, 360),
+            s: randomVal(10, 50),
+            l: randomVal(10, 50)
+          };
+        },
+        pastel: function() {
+          return {
+            h: randomVal(0, 360),
+            s: 50,
+            l: 80
+          };
+        },
+        saturated: function() {
+          return {
+            h: randomVal(0, 360),
+            s: 100,
+            l: 50
+          };
+        }
+      };
+      var hsl = color[state.get().layout.theme.random.style]();
+      var randomColor = helper.hslToRgb({
+        h: hsl.h,
+        s: (hsl.s / 100),
+        l: (hsl.l / 100)
+      });
+      state.change({
+        path: "layout.theme.current",
+        value: randomColor
+      });
     };
   };
 
   var init = function() {
-    bind();
+    random();
+    render();
   };
 
   // exposed methods
   return {
     init: init,
-    get: get,
-    restore: restore,
+    random: random,
     render: render
   };
 

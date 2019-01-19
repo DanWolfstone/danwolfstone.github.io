@@ -10,45 +10,56 @@ var data = (function() {
     return localStorage.getItem(key);
   };
 
-  var clear = function(key) {
+  var remove = function(key) {
     localStorage.removeItem(key);
   };
 
   var save = function() {
-    set(saveName, JSON.stringify(state.get()));
+    var data = {
+      version: version.get(),
+      state: state.get(),
+      bookmarks: bookmarks.get()
+    };
+    set(saveName, JSON.stringify(data));
     console.log("data saved");
   };
 
-  var restore = function() {
-    var data = JSON.parse(get(saveName));
-    if (data) {
-      bookmarks.restore(data.bookmarks);
-      theme.restore(data.theme);
-      control.restore(data.control);
-      console.log("data restored");
-    };
+  var wipe = function() {
+    remove(saveName);
   };
 
-  var wipe = function() {
-    clear(saveName);
+  var load = function() {
+    var data = JSON.parse(get(saveName));
+    return data;
+  };
+
+  var _checkForSavedData = function(data) {
+    if (data) {
+      console.log("data loaded");
+      if (!("version" in data) || data.version != version.get()) {
+        console.log("data version found less than current");
+        data = update.render(data);
+        set(saveName, JSON.stringify(data));
+      } else {
+        console.log("data version =", version.get());
+      };
+    } else {
+      console.log("no data found to load");
+    };
   };
 
   var init = function() {
-    if (get(saveName)) {
-      restore();
-    } else {
-      save();
-    };
+    _checkForSavedData(load());
   };
 
   return {
     init: init,
     save: save,
-    clear: clear,
+    remove: remove,
     set: set,
     get: get,
-    wipe: wipe,
-    restore: restore
+    load: load,
+    wipe: wipe
   };
 
 })();
